@@ -1,0 +1,11 @@
+name = "mbautilitybillsbot"
+type = "webpack"
+
+account_id = "ad8043c172f95e93320d232f65f696f9"
+workers_dev = true
+route = ""
+zone_id = ""
+compatibility_date = "2022-06-27"
+
+[triggers]
+crons = ["5 16 * * *"]
