@@ -1,2 +1,2 @@
-# leetcode-bot
-查询卷王 leetcode 进度
+# mba-utility-bills-bot
+查询 MBA 水电费
