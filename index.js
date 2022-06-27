@@ -39,20 +39,8 @@ async function handleRequest(request) {
           });
           break;
         case "check":
-          let formData = new FormData();
-          formData.append("areaId", "2111390708982824961");
-          formData.append("buildingCode", "01");
-          formData.append("floorCode", floor_code);
-          formData.append("roomCode", room_code);
-          let data = await (
-            await fetch(`${base_url}/queryISIMSRoomSurplus`, {
-              method: "POST",
-              headers: {
-                Cookie: `shiroJID=${shiroJID}`,
-              },
-              body: formData,
-            })
-          ).json();
+          let formData = getFormdata("");
+          let data = await getData("queryISIMSRoomSurplus", formData);
           if (data["success"] === true) {
             await tg(bot_token, "sendMessage", {
               chat_id: chat_id,
@@ -61,7 +49,7 @@ async function handleRequest(request) {
           } else {
             await tg(bot_token, "sendMessage", {
               chat_id: chat_id,
-              text: "查询错误：" + data["message"],
+              text: "查询请求错误：" + data["message"],
             });
           }
           break;
@@ -99,37 +87,11 @@ async function tg(token, type, data) {
 }
 
 async function NotifyLastDayUtilityBills() {
-  let socFormData = new FormData();
-  socFormData.append("areaId", "2111390708982824961");
-  socFormData.append("buildingCode", "01");
-  socFormData.append("floorCode", floor_code);
-  socFormData.append("roomCode", room_code);
-  socFormData.append("mdtype", "1153");
-  let socData = await (
-    await fetch(`${base_url}/getISIMSRecords`, {
-      method: "POST",
-      headers: {
-        Cookie: `shiroJID=${shiroJID}`,
-      },
-      body: socFormData,
-    })
-  ).json();
+  let socFormData = getFormdata("1153");
+  let socData = await getData("getISIMSRecords", socFormData);
 
-  let waterFormData = new FormData();
-  waterFormData.append("areaId", "2111390708982824961");
-  waterFormData.append("buildingCode", "01");
-  waterFormData.append("floorCode", floor_code);
-  waterFormData.append("roomCode", room_code);
-  waterFormData.append("mdtype", "1472");
-  let waterData = await (
-    await fetch(`${base_url}/getISIMSRecords`, {
-      method: "POST",
-      headers: {
-        Cookie: `shiroJID=${shiroJID}`,
-      },
-      body: waterFormData,
-    })
-  ).json();
+  let waterFormData = getFormdata("1472");
+  let waterData = await getData("getISIMSRecords", waterFormData);
 
   if (socData["success"] === true && waterData["success"] === true) {
     await tg(bot_token, "sendMessage", {
@@ -142,4 +104,30 @@ async function NotifyLastDayUtilityBills() {
       text: `查询请求错误：${socData["message"]}，${waterData["message"]}`,
     });
   }
+}
+
+function getFormdata(mdtype) {
+  let formData = new FormData();
+
+  formData.append("areaId", "2111390708982824961");
+  formData.append("buildingCode", "01");
+  formData.append("floorCode", floor_code);
+  formData.append("roomCode", room_code);
+  if (mdtype.length > 0) {
+    formData.append("mdtype", mdtype);
+  }
+
+  return formData;
+}
+
+async function getData(path, formData) {
+  return await (
+    await fetch(`${base_url}/${path}`, {
+      method: "POST",
+      headers: {
+        Cookie: `shiroJID=${shiroJID}`,
+      },
+      body: formData,
+    })
+  ).json();
 }
